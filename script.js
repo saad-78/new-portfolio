@@ -5,11 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const mobileMenuOverlay = document.querySelector('.mobile-menu-overlay');
     const mobileLinks = document.querySelectorAll('.mobile-link');
 
+
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenuOverlay.classList.toggle('active');
             // Toggle icon (simple swap logic or Lucide replacement)
         });
+
 
         // Close menu when link clicked
         mobileLinks.forEach(link => {
@@ -19,12 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
     // --- 2. Loader & Init ---
     const loader = document.querySelector('.loader');
     setTimeout(() => {
         document.body.classList.add('loaded');
         initAnimations();
     }, 1500);
+
 
 
     // --- 3. Smooth Scroll (Lenis) ---
@@ -39,12 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
             smooth: true,
         });
 
+
         function raf(time) {
             lenis.raf(time);
             requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
     }
+
 
 
     // --- 4. Theme Switcher ---
@@ -55,13 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
     htmlElement.setAttribute('data-theme', savedTheme);
     if (savedTheme === 'light') htmlElement.classList.remove('dark');
 
+
     themeToggle.addEventListener('click', () => {
         const currentTheme = htmlElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         htmlElement.setAttribute('data-theme', newTheme);
         htmlElement.classList.toggle('dark');
         localStorage.setItem('theme', newTheme);
+
+        // Keep custom cursor visible after theme switch
+        if (window.__syncCursorTheme) window.__syncCursorTheme();
     });
+
 
 
     // --- 5. Custom Cursor (Desktop Only) ---
@@ -74,20 +85,50 @@ document.addEventListener("DOMContentLoaded", () => {
             gsap.to(cursorRing, { x: e.clientX, y: e.clientY, duration: 0.15, ease: "power2.out" });
         });
 
+        // Theme-aware cursor visibility + contrast
+        window.__syncCursorTheme = () => {
+            const theme = htmlElement.getAttribute('data-theme');
+            const isLight = theme === 'light';
+
+            if (!cursorDot || !cursorRing) return;
+
+            cursorDot.style.mixBlendMode = isLight ? 'normal' : 'difference';
+            cursorRing.style.mixBlendMode = isLight ? 'normal' : 'difference';
+
+            cursorDot.style.backgroundColor = isLight ? '#000' : 'var(--accent)';
+            cursorRing.style.borderColor = isLight ? '#000' : 'var(--accent)';
+
+            // Ensure it never stays “filled” with the wrong hover color after switching themes
+            cursorRing.style.backgroundColor = 'transparent';
+        };
+
+        // Apply on load
+        window.__syncCursorTheme();
+
+
         const hoverElements = document.querySelectorAll('a, button, .magnetic');
         hoverElements.forEach(el => {
             el.addEventListener('mouseenter', () => {
+                const theme = htmlElement.getAttribute('data-theme');
+                const isLight = theme === 'light';
+
                 gsap.to(cursorRing, { scale: 1.5, duration: 0.3 });
                 cursorRing.style.borderColor = 'transparent';
-                cursorRing.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                cursorRing.style.backgroundColor = isLight
+                    ? 'rgba(0,0,0,0.15)'
+                    : 'rgba(255,255,255,0.2)';
             });
             el.addEventListener('mouseleave', () => {
+                const theme = htmlElement.getAttribute('data-theme');
+                const isLight = theme === 'light';
+
                 gsap.to(cursorRing, { scale: 1, duration: 0.3 });
-                cursorRing.style.borderColor = 'var(--accent)';
+                cursorRing.style.borderColor = isLight ? '#000' : 'var(--accent)';
                 cursorRing.style.backgroundColor = 'transparent';
             });
         });
     }
+
 
 
     // --- 6. Interactive Code Card (Typewriter) ---
@@ -114,7 +155,9 @@ document.addEventListener("DOMContentLoaded", () => {
             { text: "}" }
         ];
 
+
         let isTyping = false;
+
 
         function typeCode() {
             if (isTyping) return;
@@ -126,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cursor = document.createElement('span');
             cursor.className = 'cursor-blink';
             codeElement.appendChild(cursor);
+
 
             function typeNextChar() {
                 if (lineIndex >= codeLines.length) { isTyping = false; return; }
@@ -140,8 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     codeElement.insertBefore(currentSpan, cursor);
                 }
 
+
                 currentSpan.textContent += text[charIndex];
                 charIndex++;
+
 
                 if (charIndex >= text.length) {
                     lineIndex++;
@@ -154,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
             typeNextChar();
         }
 
+
         // Trigger on view or interaction
         ScrollTrigger.create({
             trigger: ".code-card",
@@ -161,10 +208,12 @@ document.addEventListener("DOMContentLoaded", () => {
             onEnter: () => setTimeout(typeCode, 500)
         });
 
+
         if (card) {
             card.addEventListener('mouseenter', () => { if (!isTyping) typeCode(); });
         }
     }
+
 
 
     // --- 7. 3D Tilt (Hover Only - Desktop) ---
@@ -180,6 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
             card.style.transform = `rotateX(${limitedX}deg) rotateY(${limitedY}deg) translateZ(0)`;
         });
 
+
         card.addEventListener('mouseleave', () => {
             card.style.transition = 'transform 0.5s ease-out';
             card.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(0)`;
@@ -188,8 +238,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+
     // --- 8. Scroll Animations ---
     gsap.registerPlugin(ScrollTrigger);
+
 
     function initAnimations() {
         // Hero Reveal
@@ -197,11 +249,13 @@ document.addEventListener("DOMContentLoaded", () => {
         tl.from('.reveal-char', { y: 100, opacity: 0, duration: 1, stagger: 0.05, ease: "power4.out" })
           .from('.reveal-text', { y: 20, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power2.out" }, "-=0.5");
 
+
         // Bento Grid
         gsap.from('.bento-card', {
             scrollTrigger: { trigger: '.bento-grid', start: "top 85%" },
             y: 50, opacity: 0, duration: 1, stagger: 0.2, ease: "power3.out"
         });
+
 
         // Projects
         document.querySelectorAll('.project-row').forEach(project => {

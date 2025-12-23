@@ -652,3 +652,17 @@ footer { padding: 2rem 0; border-top: 1px solid var(--border); color: var(--text
     
     .footer-content { flex-direction: column; text-align: center; }
 }
+/* Fix custom cursor visibility in LIGHT theme */
+[data-theme="light"] .cursor-dot,
+[data-theme="light"] .cursor-ring {
+    mix-blend-mode: normal;
+}
+
+/* Make sure colors are hard-contrast in light */
+[data-theme="light"] .cursor-dot {
+    background: #000;
+}
+
+[data-theme="light"] .cursor-ring {
+    border-color: #000;
+}
